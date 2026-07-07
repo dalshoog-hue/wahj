@@ -2,7 +2,7 @@
    مخطط بيانات صفحة الهبوط — كل ما يعرضه القالب يأتي من هنا
    ============================================================ */
 
-export type ThemeId = "commerce" | "luxury" | "soft";
+export type ThemeId = "commerce" | "luxury" | "soft" | "wood" | "royal";
 
 export interface LandingData {
   theme: ThemeId;
@@ -47,6 +47,8 @@ export const THEMES: Record<ThemeId, { name: string; brand: string; cta: string 
   commerce: { name: "تجاري", brand: "#1B3A8C", cta: "#F2600C" },
   luxury: { name: "فاخر", brand: "#D4A855", cta: "#C9903B" },
   soft: { name: "ناعم", brand: "#3E6B54", cta: "#5F8471" },
+  wood: { name: "خشبي", brand: "#6B4423", cta: "#B4762E" },
+  royal: { name: "ملكي", brand: "#C9A24B", cta: "#0E6B4F" },
 };
 
 export const DEFAULT_DATA: LandingData = {

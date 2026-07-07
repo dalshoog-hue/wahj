@@ -4,13 +4,16 @@ import { useState, useRef } from "react";
 import FlagshipTemplate from "@/components/FlagshipTemplate";
 import { THEMES, type LandingData, type ThemeId } from "@/lib/schema";
 import { supabase } from "@/lib/supabase";
+import ImageEditor from "@/components/ImageEditor";
 
-const GLYPHS = ["🎧", "⌚", "👟", "🧴", "🌙", "📱", "🕶️", "💍", "🧥", "🏋️", "☕", "🍯"];
+const GLYPHS = ["🎧", "⌚", "👟", "🧴", "🌙", "📱", "🪵", "🏆", "🖼️", "⚒️", "💍", "☕"];
 
 const THEME_PREVIEW: Record<ThemeId, { bg: string; desc: string }> = {
   commerce: { bg: "linear-gradient(150deg,#101B36,#1B3A8C)", desc: "أزرق واثق وبرتقالي تحويل — للمتاجر والإلكترونيات" },
   luxury: { bg: "linear-gradient(150deg,#171022,#3A2A55)", desc: "داكن بلمسات ذهبية — للعطور والساعات والهدايا" },
   soft: { bg: "linear-gradient(150deg,#F1EAE0,#DCEBE2)", desc: "فاتح هادئ — للعناية والمنتجات الطبيعية" },
+  wood: { bg: "repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 22px), linear-gradient(150deg,#4A3320,#2B1D10)", desc: "دافئ بملمس الخشب — للخشبيات والنحت والحفر بالليزر" },
+  royal: { bg: "linear-gradient(150deg,#0A120F,#1B2E26)", desc: "أخضر ملكي وذهبي — للدروع والتكريم والهدايا المؤسسية" },
 };
 
 export default function GeneratorPage() {
@@ -27,6 +30,7 @@ export default function GeneratorPage() {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [editingFile, setEditingFile] = useState<File | null>(null);
 
   /* ---------- اختيار الصورة ---------- */
   const onPickImage = (f: File | null) => {
@@ -34,8 +38,21 @@ export default function GeneratorPage() {
     if (!f.type.startsWith("image/")) { setError("الملف المختار ليس صورة"); return; }
     if (f.size > 4 * 1024 * 1024) { setError("حجم الصورة يتجاوز 4MB — اختر صورة أصغر"); return; }
     setError(null);
+    setEditingFile(f); // افتح المحرر (اقتصاص + إزالة خلفية)
+  };
+
+  const onEditorDone = (blob: Blob) => {
+    const f = new File([blob], "product.png", { type: "image/png" });
     setImageFile(f);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
     setImagePreview(URL.createObjectURL(f));
+    setEditingFile(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const onEditorCancel = () => {
+    setEditingFile(null);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const clearImage = () => {
@@ -206,6 +223,9 @@ export default function GeneratorPage() {
   /* ═════════ شاشة الإدخال ═════════ */
   return (
     <div className="gen-shell">
+      {editingFile && (
+        <ImageEditor file={editingFile} onDone={onEditorDone} onCancel={onEditorCancel} />
+      )}
       <header className="gen-head">
         <div className="gen-logo"><i>و</i> وَهْج</div>
         <span style={{ fontSize: 12, color: "#7A84A6" }}>النسخة التجريبية</span>
@@ -231,7 +251,7 @@ export default function GeneratorPage() {
                   <button type="button" className="id-remove" onClick={(e) => { e.stopPropagation(); clearImage(); }}>إزالة ✕</button>
                 </>
               ) : (
-                <span className="id-hint">📷 اضغط لاختيار صورة من جهازك (حتى 4MB)</span>
+                <span className="id-hint">📷 اختر صورة من جهازك — مع اقتصاص وإزالة خلفية (حتى 4MB)</span>
               )}
             </div>
           </div>

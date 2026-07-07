@@ -240,3 +240,48 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .img-drop .id-hint { font-size:13px; color:#9AA4C2; }
 .img-drop img { max-height:110px; border-radius:10px; }
 .img-drop .id-remove { position:absolute; top:8px; left:8px; background:rgba(220,60,60,.9); color:#fff; border:none; border-radius:8px; font-size:11px; padding:4px 10px; cursor:pointer; }
+
+/* ---------- القالب الخشبي (نحت / ليزر / أعمال يدوية) ---------- */
+.lp.theme-wood { --bg:#F7F1E8; --bg-soft:#EFE5D5; --line:#E0D2BC; --ink:#3B2A1A; --ink-2:#6B5540; --ink-3:#9A8468; }
+.lp.theme-wood .nav { background:rgba(247,241,232,.93); }
+.lp.theme-wood .announce { background:#3B2A1A; }
+.lp.theme-wood .rcard, .lp.theme-wood .buybar { background:#FFFDF9; }
+.lp.theme-wood .stage-card { background:
+  repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 26px),
+  linear-gradient(150deg,#4A3320,#2B1D10); }
+.lp.theme-wood .offer-box { background:linear-gradient(160deg,#2B1D10,#4A3320); }
+.lp.theme-wood .pill { background:#E9F2E4; color:#4C7A3F; }
+
+/* ---------- القالب الملكي (دروع / تكريم / هدايا مؤسسية) ---------- */
+.lp.theme-royal { --bg:#0F1A16; --bg-soft:#16241F; --ink:#F0EAD8; --ink-2:#BBC7BB; --ink-3:#7E8F84; --line:rgba(212,175,55,.22); }
+.lp.theme-royal .nav { background:rgba(15,26,22,.93); border-bottom-color:rgba(212,175,55,.25); }
+.lp.theme-royal .announce { background:#0A120F; color:#D9C68A; }
+.lp.theme-royal .rcard, .lp.theme-royal .buybar { background:#16241F; border-color:rgba(212,175,55,.22); }
+.lp.theme-royal .buybar { box-shadow:0 -10px 30px rgba(0,0,0,.5); }
+.lp.theme-royal .stage-card { background:radial-gradient(circle at 30% 20%, rgba(212,175,55,.28) 0%, transparent 55%), linear-gradient(150deg,#0A120F,#1B2E26); border:1px solid rgba(212,175,55,.3); }
+.lp.theme-royal .offer-box { background:linear-gradient(160deg,#0A120F,#1B2E26); border:1px solid rgba(212,175,55,.25); }
+.lp.theme-royal .fvis .meter { background:rgba(15,26,22,.9); color:var(--ink-2); }
+.lp.theme-royal .fvis .meter b { color:#D9C68A; }
+.lp.theme-royal .ftxt .fk { background:rgba(212,175,55,.1); border-color:rgba(212,175,55,.3); }
+
+/* ---------- محرر الصور ---------- */
+.ed-overlay { position:fixed; inset:0; z-index:120; background:rgba(8,11,20,.86); display:flex; align-items:center; justify-content:center; padding:14px; animation:fadeIn .25s; }
+.ed-modal { background:#151B2E; border:1px solid rgba(255,255,255,.1); border-radius:20px; width:min(430px,100%); padding:18px; color:#EDF0F8; }
+.ed-modal h3 { font-size:16px; margin-bottom:12px; }
+.ed-stage { position:relative; width:100%; aspect-ratio:1; border-radius:14px; overflow:hidden; touch-action:none; cursor:grab;
+  background:conic-gradient(#20283E 0 25%, #1A2135 0 50%, #20283E 0 75%, #1A2135 0) 0 0/22px 22px; }
+.ed-stage:active { cursor:grabbing; }
+.ed-stage canvas { width:100%; height:100%; display:block; }
+.ed-busy { position:absolute; inset:0; display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; background:rgba(8,11,20,.75); font-size:13px; text-align:center; padding:14px; }
+.ed-spinner { width:34px; height:34px; border-radius:50%; border:3px solid rgba(255,255,255,.2); border-top-color:#F2600C; animation:spinE 1s linear infinite; }
+@keyframes spinE { to { transform:rotate(360deg); } }
+.ed-row { display:flex; align-items:center; gap:10px; margin-top:12px; }
+.ed-row label { font-size:12px; color:#9AA4C2; white-space:nowrap; }
+.ed-row input[type=range] { flex:1; accent-color:#F2600C; }
+.ed-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.ed-btn { flex:1; min-width:110px; font-size:13px; padding:11px 10px; border-radius:11px; border:1px solid rgba(255,255,255,.16); background:transparent; color:#EDF0F8; cursor:pointer; font-family:inherit; transition:background .2s; }
+.ed-btn:hover { background:rgba(255,255,255,.07); }
+.ed-btn.primary { background:#F2600C; border-color:transparent; font-weight:800; }
+.ed-btn.primary:hover { filter:brightness(.92); }
+.ed-btn:disabled { opacity:.5; cursor:not-allowed; }
+.ed-note { font-size:10.5px; color:#7A84A6; margin-top:8px; text-align:center; }
