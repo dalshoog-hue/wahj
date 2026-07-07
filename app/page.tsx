@@ -157,7 +157,10 @@ export default function GeneratorPage() {
       <div className="gen-shell">
         <header className="gen-head">
           <div className="gen-logo"><i>و</i> وَهْج</div>
-          <button className="pv-btn" onClick={() => setStep("form")}>← تعديل المدخلات</button>
+          <div className="wsteps" aria-hidden="true">
+            <span>1 · التفاصيل</span><span className="on">2 · القالب</span><span>3 · المعاينة</span>
+          </div>
+          <button className="pv-btn" onClick={() => setStep("form")}>← تعديل</button>
         </header>
         <main className="gen-body">
           <h1>اختر قالبك</h1>
@@ -246,11 +249,13 @@ export default function GeneratorPage() {
       )}
       <header className="gen-head">
         <div className="gen-logo"><i>و</i> وَهْج</div>
-        <span style={{ fontSize: 12, color: "#7A84A6" }}>النسخة التجريبية</span>
+        <div className="wsteps" aria-hidden="true">
+          <span className="on">1 · التفاصيل</span><span>2 · القالب</span><span>3 · المعاينة</span>
+        </div>
       </header>
 
       <main className="gen-body">
-        <h1>صفحة هبوط تبيع فعلاً<br />في أقل من دقيقة</h1>
+        <h1>صفحة هبوط <span className="wg">تبيع فعلاً</span><br />في أقل من دقيقة</h1>
         <p className="lead">
           صف منتجك — أو ارفع صورته — وسيبني لك وَهْج صفحة احترافية بثلاثة قوالب
           وألوان قابلة للتخصيص، جاهزة للنشر برابط مباشر.

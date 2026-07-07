@@ -302,3 +302,92 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .ed-t { outline:1.5px dashed color-mix(in srgb, var(--cta) 55%, transparent); outline-offset:2px; border-radius:4px; cursor:text; transition:outline-color .2s, background .2s; }
 .ed-t:hover { background:color-mix(in srgb, var(--cta) 10%, transparent); }
 .ed-t:focus { outline:2px solid var(--cta); background:color-mix(in srgb, var(--cta) 8%, transparent); }
+
+/* ═══════════════════════════════════════════════
+   هوية وَهْج 2.0 — فاتحة دافئة بتوهج جمري
+   ═══════════════════════════════════════════════ */
+:root {
+  --w-bg: #FAF6EF;
+  --w-card: #FFFFFF;
+  --w-ink: #241C15;
+  --w-ink2: #6E6155;
+  --w-ink3: #A2937F;
+  --w-line: #EBE2D3;
+  --w-ember: #FF7A1A;
+  --w-ember2: #FFB347;
+  --w-glow: linear-gradient(120deg, #FF7A1A, #FFB347);
+}
+
+.gen-shell {
+  background:
+    radial-gradient(720px 420px at 88% -8%, rgba(255,179,71,.22), transparent 62%),
+    radial-gradient(560px 380px at -8% 100%, rgba(255,122,26,.12), transparent 60%),
+    var(--w-bg);
+  color: var(--w-ink);
+}
+.gen-head { background: rgba(250,246,239,.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--w-line); position: sticky; top: 0; z-index: 40; }
+.gen-logo { color: var(--w-ink); }
+.gen-logo i { background: var(--w-glow); box-shadow: 0 4px 16px rgba(255,122,26,.45); color: #fff; }
+.gen-head > span { color: var(--w-ink3) !important; }
+
+/* مؤشر الخطوات */
+.wsteps { display: flex; gap: 6px; }
+.wsteps span { font-size: 11.5px; color: var(--w-ink3); border: 1px solid var(--w-line); background: #fff; padding: 6px 13px; border-radius: 99px; }
+.wsteps span.on { background: var(--w-glow); color: #fff; border-color: transparent; font-weight: 700; box-shadow: 0 4px 12px rgba(255,122,26,.35); }
+@media (max-width: 560px) { .wsteps span { padding: 6px 10px; } }
+
+.gen-body h1 { color: var(--w-ink); }
+.gen-body h1 .wg {
+  background: var(--w-glow); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.gen-body .lead { color: var(--w-ink2); }
+
+/* النموذج كبطاقة */
+.gen-form { background: var(--w-card); border: 1px solid var(--w-line); border-radius: 22px; padding: 24px 20px; box-shadow: 0 20px 50px rgba(36,28,21,.07); }
+.gf label { color: var(--w-ink2); }
+.gf input, .gf textarea { background: var(--w-bg); border-color: var(--w-line); color: var(--w-ink); }
+.gf input::placeholder, .gf textarea::placeholder { color: var(--w-ink3); }
+.gf input:focus, .gf textarea:focus { border-color: var(--w-ember); background: #fff; }
+
+.glyph-picker button { border-color: var(--w-line); background: var(--w-bg); }
+.glyph-picker button.on { border-color: var(--w-ember); background: rgba(255,122,26,.1); }
+
+.theme-pills button { border-color: var(--w-line); background: #fff; color: var(--w-ink2); }
+.theme-pills button.on { background: var(--w-glow); color: #fff; font-weight: 700; }
+
+.img-drop { border-color: var(--w-line); background: var(--w-bg); }
+.img-drop:hover { border-color: var(--w-ember); }
+.img-drop .id-hint { color: var(--w-ink3); }
+
+.gen-submit { background: var(--w-glow); box-shadow: 0 10px 26px rgba(255,122,26,.4); }
+.gen-submit:hover { filter: brightness(1.05); }
+.gen-note { color: var(--w-ink3); }
+
+/* شاشة اختيار القالب */
+.pick-card { border-color: var(--w-line); background: var(--w-card); box-shadow: 0 12px 32px rgba(36,28,21,.06); }
+.pick-card:hover { border-color: var(--w-ember); }
+.pick-card b { color: var(--w-ink); }
+.pick-card small { color: var(--w-ink2); }
+
+/* أشرطة المعاينة والتخصيص */
+.preview-bar { background: rgba(250,246,239,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--w-line); color: var(--w-ink); }
+.custom-bar { background: #fff; border-bottom: 1px solid var(--w-line); color: var(--w-ink); }
+.custom-bar .cb-label, .color-ctl { color: var(--w-ink2); }
+.pv-btn { border-color: var(--w-line); background: #fff; color: var(--w-ink); }
+.pv-btn:hover { background: var(--w-bg); }
+.pv-btn.primary { background: var(--w-glow); color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(255,122,26,.35); }
+
+.publish-result { background: #EDF7F0; border-color: #BFE3CC; color: #1F5B38; }
+.publish-result a { color: #0E6B3A; }
+
+/* محرر الصور بهوية فاتحة */
+.ed-overlay { background: rgba(36,28,21,.45); backdrop-filter: blur(4px); }
+.ed-modal { background: var(--w-card); border-color: var(--w-line); color: var(--w-ink); box-shadow: 0 30px 70px rgba(36,28,21,.25); }
+.ed-stage { background: conic-gradient(#F1EADD 0 25%, #FAF6EF 0 50%, #F1EADD 0 75%, #FAF6EF 0) 0 0/22px 22px; }
+.ed-row label, .ed-note { color: var(--w-ink3); }
+.ed-row input[type=range] { accent-color: var(--w-ember); }
+.ed-btn { border-color: var(--w-line); background: #fff; color: var(--w-ink); }
+.ed-btn:hover { background: var(--w-bg); }
+.ed-btn.primary { background: var(--w-glow); color: #fff; border-color: transparent; }
+.ed-busy { background: rgba(250,246,239,.86); color: var(--w-ink2); }
+.ed-spinner { border-color: rgba(255,122,26,.25); border-top-color: var(--w-ember); }
