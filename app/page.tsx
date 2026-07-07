@@ -22,6 +22,8 @@ export default function GeneratorPage() {
   const [price, setPrice] = useState("");
   const [glyph, setGlyph] = useState("🎧");
   const [category, setCategory] = useState<CategoryId>("general");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [editMode, setEditMode] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,16 @@ export default function GeneratorPage() {
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [editingFile, setEditingFile] = useState<File | null>(null);
+
+  /* ---------- تطبيع رقم الواتساب ---------- */
+  const normalizeWa = (raw: string): string | null => {
+    let d = raw.replace(/[٠-٩]/g, (c) => String("٠١٢٣٤٥٦٧٨٩".indexOf(c))).replace(/\D/g, "");
+    if (!d) return null;
+    if (d.startsWith("00")) d = d.slice(2);
+    if (d.startsWith("05")) d = "966" + d.slice(1);
+    else if (d.startsWith("5") && d.length === 9) d = "966" + d;
+    return d.length >= 11 ? d : null;
+  };
 
   /* ---------- اختيار الصورة ---------- */
   const onPickImage = (f: File | null) => {
@@ -90,12 +102,13 @@ export default function GeneratorPage() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description: desc, price: Number(price), glyph: glyph || CATEGORIES[category].glyph, image: imageUrl, category }),
+        body: JSON.stringify({ name, description: desc, price: Number(price), glyph: glyph || CATEGORIES[category].glyph, image: imageUrl, category, whatsapp: normalizeWa(whatsapp) }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "فشل التوليد");
       const d = json.data as LandingData;
       d.hero.image = imageUrl; // ضمان بقاء الصورة حتى لو تجاهلها النموذج
+      d.contact = { ...(d.contact || {}), whatsapp: normalizeWa(whatsapp) };
       setData(d);
       setStep("pick");
     } catch (e: unknown) {
@@ -194,6 +207,10 @@ export default function GeneratorPage() {
               </button>
             ))}
           </div>
+          <button className={`pv-btn${editMode ? " primary" : ""}`} style={{ fontSize: 12, padding: "8px 14px" }}
+                  onClick={() => setEditMode(!editMode)}>
+            {editMode ? "✓ إنهاء التحرير" : "✏️ تحرير النصوص"}
+          </button>
           <span className="color-ctl">
             اللون الأساسي
             <input type="color" value={data.colors.brand} onChange={(e) => setColor("brand", e.target.value)} aria-label="اللون الأساسي" />
@@ -216,7 +233,7 @@ export default function GeneratorPage() {
             <div className="publish-result" style={{ borderColor: "rgba(220,60,60,.5)", background: "rgba(220,60,60,.08)" }}>⚠️ {error}</div>
           </div>
         )}
-        <FlagshipTemplate data={data} />
+        <FlagshipTemplate data={data} edit={editMode} onData={setData} />
       </div>
     );
   }
@@ -276,6 +293,11 @@ export default function GeneratorPage() {
             <label>وصف المنتج (كلما زادت التفاصيل، تحسّن المحتوى)</label>
             <textarea value={desc} onChange={(e) => setDesc(e.target.value)}
                       placeholder="مثال: سماعات لاسلكية بعزل ضوضاء نشط، بطارية 36 ساعة، مناسبة للعمل والسفر…" />
+          </div>
+          <div className="gf">
+            <label>رقم واتساب استقبال الطلبات (كل أزرار "اطلب الآن" ستفتح محادثتك)</label>
+            <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)}
+                   inputMode="tel" dir="ltr" style={{ textAlign: "left" }} placeholder="05xxxxxxxx" />
           </div>
           <div className="gf-row">
             <div className="gf">

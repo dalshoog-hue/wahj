@@ -6,6 +6,7 @@ export type ThemeId = "commerce" | "luxury" | "soft" | "wood" | "royal";
 
 export interface LandingData {
   theme: ThemeId;
+  contact?: { whatsapp?: string | null; storeUrl?: string | null };
   colors: { brand: string; cta: string };
   brand: { name: string; initial: string };
   announce: string;
@@ -53,6 +54,7 @@ export const THEMES: Record<ThemeId, { name: string; brand: string; cta: string 
 
 export const DEFAULT_DATA: LandingData = {
   theme: "commerce",
+  contact: { whatsapp: null, storeUrl: null },
   colors: { brand: "#1B3A8C", cta: "#F2600C" },
   brand: { name: "موجة برو", initial: "م" },
   announce: "🔥 عرض الإطلاق: خصم يصل إلى 40% + شحن مجاني — لفترة محدودة",
@@ -315,7 +317,7 @@ const PACKS: Record<CategoryId, Pack> = {
 
 /* ---------- المولّد المحلي (بدون AI) ----------
    يُستخدم كوضع مجاني/احتياطي عند غياب مفتاح Gemini */
-export function generateLocal(input: { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId }): LandingData {
+export function generateLocal(input: { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId; whatsapp?: string | null }): LandingData {
   const d = structuredClone(DEFAULT_DATA);
   const { name, description, price, glyph } = input;
   d.brand.name = name;
@@ -325,6 +327,7 @@ export function generateLocal(input: { name: string; description: string; price:
   d.hero.sub = description;
   d.hero.glyph = glyph || "✨";
   d.hero.image = input.image || null;
+  d.contact = { whatsapp: input.whatsapp || null, storeUrl: null };
   const cat: CategoryId = input.category && PACKS[input.category] ? input.category : "general";
   const pk = PACKS[cat];
   d.theme = CATEGORIES[cat].theme;
@@ -348,7 +351,7 @@ export function generateLocal(input: { name: string; description: string; price:
 }
 
 /* ---------- مطالبة Gemini ---------- */
-export function buildPrompt(input: { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId }): string {
+export function buildPrompt(input: { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId; whatsapp?: string | null }): string {
   return `أنت خبير كتابة إعلانية عربي (Copywriter) متخصص في صفحات الهبوط عالية التحويل.
 المنتج: ${input.name}
 الوصف: ${input.description}

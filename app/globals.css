@@ -297,3 +297,8 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .sf-meta { position:relative; z-index:1; text-align:center; margin-top:14px; }
 .sf-name { color:var(--ink); }
 .lp.theme-luxury .sf-img, .lp.theme-royal .sf-img { filter:drop-shadow(0 34px 40px rgba(0,0,0,.6)); }
+
+/* ---------- وضع تحرير النصوص ---------- */
+.ed-t { outline:1.5px dashed color-mix(in srgb, var(--cta) 55%, transparent); outline-offset:2px; border-radius:4px; cursor:text; transition:outline-color .2s, background .2s; }
+.ed-t:hover { background:color-mix(in srgb, var(--cta) 10%, transparent); }
+.ed-t:focus { outline:2px solid var(--cta); background:color-mix(in srgb, var(--cta) 8%, transparent); }

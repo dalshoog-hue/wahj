@@ -3,7 +3,7 @@ import { buildPrompt, generateLocal, type LandingData, type CategoryId } from "@
 
 export const maxDuration = 30;
 
-interface GenInput { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId }
+interface GenInput { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId; whatsapp?: string | null }
 
 export async function POST(req: Request) {
   let input: GenInput;

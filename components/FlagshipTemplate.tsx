@@ -75,7 +75,15 @@ const IC = {
 /* ============================================================
    القالب الرئيسي — كل المحتوى من data
    ============================================================ */
-export default function FlagshipTemplate({ data }: { data: LandingData }) {
+export default function FlagshipTemplate({
+  data,
+  edit = false,
+  onData,
+}: {
+  data: LandingData;
+  edit?: boolean;
+  onData?: (d: LandingData) => void;
+}) {
   const [bundle, setBundle] = useState(data.bundles.find((b) => b.popular)?.id ?? data.bundles[0]?.id ?? 1);
   const [openFaq, setOpenFaq] = useState(0);
   const [showBar, setShowBar] = useState(false);
@@ -94,11 +102,38 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
   const chosen = data.bundles.find((b) => b.id === bundle) ?? data.bundles[0];
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
+  /* شراء: واتساب برسالة جاهزة → رابط المتجر → قسم العروض */
+  const buy = () => {
+    if (edit) return;
+    const wa = data.contact?.whatsapp;
+    if (wa) {
+      const msg = `مرحباً 👋 أرغب بطلب: ${data.hero.productName}\nالباقة: ${chosen.title} — ${chosen.price} ر.س\nمن الصفحة: ${typeof window !== "undefined" ? window.location.href : ""}`;
+      window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, "_blank");
+    } else if (data.contact?.storeUrl) {
+      window.open(data.contact.storeUrl, "_blank");
+    } else {
+      go("offer");
+    }
+  };
+
+  /* نص قابل للتحرير في وضع التخصيص */
+  const T = ({ v, set }: { v: string; set: (s: string) => void }) =>
+    edit ? (
+      <span className="ed-t" contentEditable suppressContentEditableWarning
+            onBlur={(e) => { const t = e.currentTarget.textContent ?? ""; if (t !== v && onData) set(t); }}>
+        {v}
+      </span>
+    ) : (
+      <>{v}</>
+    );
+  const D = data;
+  const up = (fn: (d: LandingData) => void) => { if (!onData) return; const d = structuredClone(D); fn(d); onData(d); };
+
   return (
     <div className={`lp theme-${data.theme || "commerce"}`} lang="ar-u-nu-latn"
          style={{ ["--brand" as string]: data.colors.brand, ["--cta" as string]: data.colors.cta }}>
 
-      <div className="announce">{data.announce}</div>
+      <div className="announce"><T v={data.announce} set={(t)=>up((d)=>{d.announce=t;})} /></div>
 
       <nav className="nav">
         <div className="wrap nav-in">
@@ -117,9 +152,9 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
       <header className="hero" ref={heroRef}>
         <div className="wrap hero-grid">
           <div>
-            <span className="pill">● {data.hero.availability}</span>
-            <h1>{data.hero.title} <span className="hl">{data.hero.highlight}</span></h1>
-            <p className="hero-sub">{data.hero.sub}</p>
+            <span className="pill">● <T v={data.hero.availability} set={(t)=>up((d)=>{d.hero.availability=t;})} /></span>
+            <h1><T v={data.hero.title} set={(t)=>up((d)=>{d.hero.title=t;})} /> <span className="hl"><T v={data.hero.highlight} set={(t)=>up((d)=>{d.hero.highlight=t;})} /></span></h1>
+            <p className="hero-sub"><T v={data.hero.sub} set={(t)=>up((d)=>{d.hero.sub=t;})} /></p>
             <div className="rating-row">
               <div className="avatars" aria-hidden="true">
                 {["#7C5CD9", "#2E86C1", "#0E9F6E", "#D14E03"].map((c, i) => (
@@ -130,7 +165,7 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
               <small><b className="num">4.9</b> من أكثر من <b className="num">{data.hero.ratingCount}</b> تقييم موثّق</small>
             </div>
             <div className="hero-ctas">
-              <button className="btn btn-cta" onClick={() => go("offer")}>
+              <button className="btn btn-cta" onClick={buy}>
                 اطلبه الآن — <span className="num">{chosen.price} ر.س</span>
               </button>
               <button className="btn btn-ghost" onClick={() => go("features")}>اكتشف المميزات</button>
@@ -226,10 +261,10 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
               </Reveal>
               <Reveal delay={120}>
                 <div className="ftxt">
-                  <span className="fk">{f.kicker}</span>
-                  <h3>{f.title}</h3>
-                  <p>{f.body}</p>
-                  <ul>{f.bullets.map((b, j) => <li key={j}>{b}</li>)}</ul>
+                  <span className="fk"><T v={f.kicker} set={(t)=>up((d)=>{d.features[i].kicker=t;})} /></span>
+                  <h3><T v={f.title} set={(t)=>up((d)=>{d.features[i].title=t;})} /></h3>
+                  <p><T v={f.body} set={(t)=>up((d)=>{d.features[i].body=t;})} /></p>
+                  <ul>{f.bullets.map((b, j) => <li key={j}><T v={b} set={(t)=>up((d)=>{d.features[i].bullets[j]=t;})} /></li>)}</ul>
                 </div>
               </Reveal>
             </div>
@@ -251,10 +286,10 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
               <Reveal key={i} delay={i * 130}>
                 <div className="rcard">
                   <span className="stars" aria-hidden="true">★★★★★</span>
-                  <p>«{r.text}»</p>
+                  <p>«<T v={r.text} set={(t)=>up((d)=>{d.reviews[i].text=t;})} />»</p>
                   <div className="rwho">
                     <i style={{ background: r.color }}>{r.name[0]}</i>
-                    <span><b>{r.name}</b><small>✓ عملية شراء موثّقة · {r.when}</small></span>
+                    <span><b><T v={r.name} set={(t)=>up((d)=>{d.reviews[i].name=t;})} /></b><small>✓ عملية شراء موثّقة · {r.when}</small></span>
                   </div>
                 </div>
               </Reveal>
@@ -292,8 +327,8 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
                 ))}
               </div>
               <div className="offer-cta">
-                <button className="btn btn-cta" style={{ fontSize: 16, padding: "16px 46px" }}>
-                  أكمل الطلب — <span className="num">{chosen.price} ر.س</span>
+                <button className="btn btn-cta" style={{ fontSize: 16, padding: "16px 46px" }} onClick={buy}>
+                  {data.contact?.whatsapp ? "اطلب عبر واتساب" : "أكمل الطلب"} — <span className="num">{chosen.price} ر.س</span>
                 </button>
                 <div className="offer-note">
                   <span>🔒 دفع آمن ومشفّر</span>
@@ -320,10 +355,10 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
               <div className={`faq-item${openFaq === i ? " open" : ""}`}>
                 <button className="faq-q" aria-expanded={openFaq === i}
                         onClick={() => setOpenFaq(openFaq === i ? -1 : i)}>
-                  {f.q} <span className="pm" aria-hidden="true">+</span>
+                  <T v={f.q} set={(t)=>up((d)=>{d.faqs[i].q=t;})} /> <span className="pm" aria-hidden="true">+</span>
                 </button>
                 <div className="faq-a" style={{ maxHeight: openFaq === i ? 220 : 0 }}>
-                  <p>{f.a}</p>
+                  <p><T v={f.a} set={(t)=>up((d)=>{d.faqs[i].a=t;})} /></p>
                 </div>
               </div>
             </Reveal>
@@ -336,10 +371,10 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
         <div className="wrap">
           <Reveal>
             <div className="g-shield" aria-hidden="true">🛡️</div>
-            <h2>{data.guarantee.title}</h2>
-            <p>{data.guarantee.body}</p>
+            <h2><T v={data.guarantee.title} set={(t)=>up((d)=>{d.guarantee.title=t;})} /></h2>
+            <p><T v={data.guarantee.body} set={(t)=>up((d)=>{d.guarantee.body=t;})} /></p>
             <div style={{ marginTop: 26 }}>
-              <button className="btn btn-cta" onClick={() => go("offer")}>اطلبه الآن بدون مخاطرة</button>
+              <button className="btn btn-cta" onClick={buy}>اطلبه الآن بدون مخاطرة</button>
             </div>
           </Reveal>
         </div>
@@ -364,7 +399,7 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
             <b>{data.brand.name} — {chosen.title}</b>
             <span><span className="bb-price num">{chosen.price} ر.س</span> <s className="num" style={{ color: "#A6AFC4" }}>{chosen.old}</s> · شحن مجاني</span>
           </div>
-          <button className="btn btn-cta" style={{ padding: "12px 26px", fontSize: 14 }} onClick={() => go("offer")}>اطلب الآن</button>
+          <button className="btn btn-cta" style={{ padding: "12px 26px", fontSize: 14 }} onClick={buy}>اطلب الآن</button>
         </div>
       )}
     </div>
