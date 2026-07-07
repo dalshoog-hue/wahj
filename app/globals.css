@@ -194,3 +194,49 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .pv-btn.primary { background:#F2600C; border-color:transparent; font-weight:800; }
 .publish-result { background:rgba(14,159,110,.12); border:1px solid rgba(14,159,110,.4); border-radius:12px; padding:14px 18px; margin-top:14px; font-size:14px; }
 .publish-result a { color:#4ADE9E; font-weight:700; word-break:break-all; }
+
+/* ---------- صورة المنتج ---------- */
+.stage-img { width:230px; height:230px; object-fit:contain; border-radius:18px; margin-top:6px; filter:drop-shadow(0 24px 30px rgba(0,0,0,.4)); animation:floaty 5s ease-in-out infinite; background:rgba(255,255,255,.06); }
+
+/* ---------- القالب الفاخر (داكن ذهبي) ---------- */
+.lp { background:var(--bg); color:var(--ink); }
+.lp.theme-luxury { --bg:#171022; --bg-soft:#221934; --ink:#F2ECE0; --ink-2:#C0B5A4; --ink-3:#8D8373; --line:rgba(255,255,255,.13); }
+.lp.theme-luxury .nav { background:rgba(23,16,34,.92); }
+.lp.theme-luxury .rcard, .lp.theme-luxury .buybar { background:#221934; border-color:rgba(255,255,255,.13); }
+.lp.theme-luxury .buybar { box-shadow:0 -10px 30px rgba(0,0,0,.5); }
+.lp.theme-luxury .fvis .meter { background:rgba(23,16,34,.9); color:var(--ink-2); }
+.lp.theme-luxury .fvis .meter b { color:var(--ink); }
+.lp.theme-luxury .pill { background:rgba(14,159,110,.16); }
+.lp.theme-luxury .ftxt .fk { background:rgba(255,255,255,.06); }
+.lp.theme-luxury .announce { background:#0E0818; }
+
+/* ---------- القالب الناعم (فاتح دافئ) ---------- */
+.lp.theme-soft { --bg:#FBF7F0; --bg-soft:#F1EAE0; --line:#E8DFD2; --ink:#33403A; --ink-2:#5C6B63; --ink-3:#8E9A92; }
+.lp.theme-soft .nav { background:rgba(251,247,240,.92); }
+.lp.theme-soft .rcard, .lp.theme-soft .buybar { background:#fff; }
+.lp.theme-soft .announce { background:#33403A; }
+
+/* ---------- شاشة اختيار القالب ---------- */
+.pick-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:28px; }
+.pick-card { border:2px solid rgba(255,255,255,.12); border-radius:18px; overflow:hidden; cursor:pointer; background:rgba(255,255,255,.04); transition:transform .3s, border-color .25s; text-align:center; }
+.pick-card:hover { transform:translateY(-5px); border-color:#F2600C; }
+.pick-thumb { height:110px; display:grid; place-items:center; font-size:38px; }
+.pick-card b { display:block; padding:12px 8px 4px; font-size:15px; }
+.pick-card small { display:block; padding:0 10px 14px; color:#9AA4C2; font-size:11.5px; }
+
+/* ---------- لوحة تخصيص المعاينة ---------- */
+.custom-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 18px; background:#151B2E; border-bottom:1px solid rgba(255,255,255,.08); color:#fff; }
+.custom-bar .cb-label { font-size:12px; color:#9AA4C2; }
+.theme-pills { display:flex; gap:6px; }
+.theme-pills button { font-size:12px; padding:7px 14px; border-radius:99px; border:1px solid rgba(255,255,255,.18); background:transparent; color:#fff; cursor:pointer; font-family:inherit; }
+.theme-pills button.on { background:#F2600C; border-color:transparent; font-weight:700; }
+.color-ctl { display:flex; align-items:center; gap:6px; font-size:12px; color:#9AA4C2; }
+.color-ctl input[type=color] { width:32px; height:32px; border:none; border-radius:8px; padding:0; background:none; cursor:pointer; }
+
+/* ---------- رفع الصورة ---------- */
+.img-drop { border:1.5px dashed rgba(255,255,255,.2); border-radius:14px; padding:18px; text-align:center; cursor:pointer; transition:border-color .2s; position:relative; }
+.img-drop:hover { border-color:#F2600C; }
+.img-drop input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.img-drop .id-hint { font-size:13px; color:#9AA4C2; }
+.img-drop img { max-height:110px; border-radius:10px; }
+.img-drop .id-remove { position:absolute; top:8px; left:8px; background:rgba(220,60,60,.9); color:#fff; border:none; border-radius:8px; font-size:11px; padding:4px 10px; cursor:pointer; }

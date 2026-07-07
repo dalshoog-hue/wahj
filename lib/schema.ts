@@ -2,7 +2,10 @@
    مخطط بيانات صفحة الهبوط — كل ما يعرضه القالب يأتي من هنا
    ============================================================ */
 
+export type ThemeId = "commerce" | "luxury" | "soft";
+
 export interface LandingData {
+  theme: ThemeId;
   colors: { brand: string; cta: string };
   brand: { name: string; initial: string };
   announce: string;
@@ -12,6 +15,7 @@ export interface LandingData {
     highlight: string;  // الجزء المميز بلون العلامة
     sub: string;
     glyph: string;      // رمز/إيموجي المنتج لمنصّة العرض
+    image?: string | null; // رابط صورة المنتج المرفوعة (تحل محل الرمز)
     productName: string;
     productTag: string;
     badge: string;      // مثل: خصم 29%
@@ -39,7 +43,14 @@ export interface LandingData {
 }
 
 /* ---------- بيانات افتراضية (منتج تجريبي) ---------- */
+export const THEMES: Record<ThemeId, { name: string; brand: string; cta: string }> = {
+  commerce: { name: "تجاري", brand: "#1B3A8C", cta: "#F2600C" },
+  luxury: { name: "فاخر", brand: "#D4A855", cta: "#C9903B" },
+  soft: { name: "ناعم", brand: "#3E6B54", cta: "#5F8471" },
+};
+
 export const DEFAULT_DATA: LandingData = {
+  theme: "commerce",
   colors: { brand: "#1B3A8C", cta: "#F2600C" },
   brand: { name: "موجة برو", initial: "م" },
   announce: "🔥 عرض الإطلاق: خصم يصل إلى 40% + شحن مجاني — لفترة محدودة",
@@ -49,6 +60,7 @@ export const DEFAULT_DATA: LandingData = {
     highlight: "لم تسمعها من قبل",
     sub: "سماعات موجة برو اللاسلكية بعزل ضوضاء نشط 42dB وبطارية تدوم 36 ساعة — صوت استوديو حقيقي، وراحة تنسيك أنك ترتديها.",
     glyph: "🎧",
+    image: null,
     productName: "موجة برو — إصدار 2026",
     productTag: "أسود منتصف الليل · لاسلكية بالكامل",
     badge: "خصم 29%",
@@ -117,7 +129,7 @@ export const DEFAULT_DATA: LandingData = {
 
 /* ---------- المولّد المحلي (بدون AI) ----------
    يُستخدم كوضع مجاني/احتياطي عند غياب مفتاح Gemini */
-export function generateLocal(input: { name: string; description: string; price: number; glyph: string }): LandingData {
+export function generateLocal(input: { name: string; description: string; price: number; glyph: string; image?: string | null }): LandingData {
   const d = structuredClone(DEFAULT_DATA);
   const { name, description, price, glyph } = input;
   d.brand.name = name;
@@ -126,6 +138,7 @@ export function generateLocal(input: { name: string; description: string; price:
   d.hero.highlight = "بتجربة لن تنساها";
   d.hero.sub = description;
   d.hero.glyph = glyph || "✨";
+  d.hero.image = input.image || null;
   d.hero.productName = name;
   d.hero.productTag = "الإصدار الأحدث";
   d.hero.price = price;
@@ -140,7 +153,7 @@ export function generateLocal(input: { name: string; description: string; price:
 }
 
 /* ---------- مطالبة Gemini ---------- */
-export function buildPrompt(input: { name: string; description: string; price: number; glyph: string }): string {
+export function buildPrompt(input: { name: string; description: string; price: number; glyph: string; image?: string | null }): string {
   return `أنت خبير كتابة إعلانية عربي (Copywriter) متخصص في صفحات الهبوط عالية التحويل.
 المنتج: ${input.name}
 الوصف: ${input.description}

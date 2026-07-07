@@ -95,7 +95,7 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
   const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div className="lp" lang="ar-u-nu-latn"
+    <div className={`lp theme-${data.theme || "commerce"}`} lang="ar-u-nu-latn"
          style={{ ["--brand" as string]: data.colors.brand, ["--cta" as string]: data.colors.cta }}>
 
       <div className="announce">{data.announce}</div>
@@ -146,7 +146,12 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
           <div className="stage">
             <div className="stage-card">
               <span className="stage-badge">{data.hero.badge}</span>
-              <div className="stage-glyph" aria-hidden="true">{data.hero.glyph}</div>
+              {data.hero.image ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img className="stage-img" src={data.hero.image} alt={data.hero.productName} />
+              ) : (
+                <div className="stage-glyph" aria-hidden="true">{data.hero.glyph}</div>
+              )}
               <div className="stage-name">{data.hero.productName}</div>
               <div className="stage-tag">{data.hero.productTag}</div>
             </div>

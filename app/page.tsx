@@ -1,22 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import FlagshipTemplate from "@/components/FlagshipTemplate";
-import type { LandingData } from "@/lib/schema";
+import { THEMES, type LandingData, type ThemeId } from "@/lib/schema";
+import { supabase } from "@/lib/supabase";
 
 const GLYPHS = ["🎧", "⌚", "👟", "🧴", "🌙", "📱", "🕶️", "💍", "🧥", "🏋️", "☕", "🍯"];
+
+const THEME_PREVIEW: Record<ThemeId, { bg: string; desc: string }> = {
+  commerce: { bg: "linear-gradient(150deg,#101B36,#1B3A8C)", desc: "أزرق واثق وبرتقالي تحويل — للمتاجر والإلكترونيات" },
+  luxury: { bg: "linear-gradient(150deg,#171022,#3A2A55)", desc: "داكن بلمسات ذهبية — للعطور والساعات والهدايا" },
+  soft: { bg: "linear-gradient(150deg,#F1EAE0,#DCEBE2)", desc: "فاتح هادئ — للعناية والمنتجات الطبيعية" },
+};
 
 export default function GeneratorPage() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
   const [glyph, setGlyph] = useState("🎧");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<"form" | "pick" | "preview">("form");
   const [data, setData] = useState<LandingData | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
+  /* ---------- اختيار الصورة ---------- */
+  const onPickImage = (f: File | null) => {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { setError("الملف المختار ليس صورة"); return; }
+    if (f.size > 4 * 1024 * 1024) { setError("حجم الصورة يتجاوز 4MB — اختر صورة أصغر"); return; }
+    setError(null);
+    setImageFile(f);
+    setImagePreview(URL.createObjectURL(f));
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  /* ---------- رفع الصورة إلى Supabase ---------- */
+  const uploadImage = async (): Promise<string | null> => {
+    if (!imageFile) return null;
+    const ext = imageFile.name.split(".").pop()?.toLowerCase() || "png";
+    const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage.from("wahj").upload(path, imageFile, {
+      cacheControl: "31536000",
+      contentType: imageFile.type,
+    });
+    if (upErr) throw new Error("تعذر رفع الصورة — حاول مجدداً");
+    return supabase.storage.from("wahj").getPublicUrl(path).data.publicUrl;
+  };
+
+  /* ---------- التوليد ---------- */
   const generate = async () => {
     if (!name.trim() || !desc.trim() || !price) {
       setError("عبّئ اسم المنتج والوصف والسعر أولاً");
@@ -26,14 +68,18 @@ export default function GeneratorPage() {
     setLoading(true);
     setPublishedUrl(null);
     try {
+      const imageUrl = await uploadImage();
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description: desc, price: Number(price), glyph }),
+        body: JSON.stringify({ name, description: desc, price: Number(price), glyph, image: imageUrl }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "فشل التوليد");
-      setData(json.data as LandingData);
+      const d = json.data as LandingData;
+      d.hero.image = imageUrl; // ضمان بقاء الصورة حتى لو تجاهلها النموذج
+      setData(d);
+      setStep("pick");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "حدث خطأ غير متوقع");
     } finally {
@@ -41,6 +87,19 @@ export default function GeneratorPage() {
     }
   };
 
+  /* ---------- اختيار/تبديل القالب ---------- */
+  const applyTheme = (t: ThemeId) => {
+    if (!data) return;
+    setData({ ...data, theme: t, colors: { brand: THEMES[t].brand, cta: THEMES[t].cta } });
+  };
+  const pickTheme = (t: ThemeId) => { applyTheme(t); setStep("preview"); };
+
+  const setColor = (key: "brand" | "cta", value: string) => {
+    if (!data) return;
+    setData({ ...data, colors: { ...data.colors, [key]: value } });
+  };
+
+  /* ---------- النشر ---------- */
   const publish = async () => {
     if (!data) return;
     setPublishing(true);
@@ -61,18 +120,70 @@ export default function GeneratorPage() {
     }
   };
 
-  /* ---------- وضع المعاينة ---------- */
-  if (data) {
+  /* ═════════ شاشة اختيار القالب ═════════ */
+  if (step === "pick" && data) {
+    return (
+      <div className="gen-shell">
+        <header className="gen-head">
+          <div className="gen-logo"><i>و</i> وَهْج</div>
+          <button className="pv-btn" onClick={() => setStep("form")}>← تعديل المدخلات</button>
+        </header>
+        <main className="gen-body">
+          <h1>اختر قالبك</h1>
+          <p className="lead">ثلاثة اتجاهات بصرية لنفس المحتوى — تقدر تبدّل بينها وتعدّل الألوان بعد الاختيار.</p>
+          <div className="pick-grid">
+            {(Object.keys(THEMES) as ThemeId[]).map((t) => (
+              <div key={t} className="pick-card" role="button" tabIndex={0}
+                   onClick={() => pickTheme(t)}
+                   onKeyDown={(e) => e.key === "Enter" && pickTheme(t)}>
+                <div className="pick-thumb" style={{ background: THEME_PREVIEW[t].bg }}>
+                  {data.hero.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={data.hero.image} alt="" style={{ maxHeight: 80, borderRadius: 10 }} />
+                  ) : (
+                    <span>{data.hero.glyph}</span>
+                  )}
+                </div>
+                <b>{THEMES[t].name}</b>
+                <small>{THEME_PREVIEW[t].desc}</small>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  /* ═════════ شاشة المعاينة والتخصيص ═════════ */
+  if (step === "preview" && data) {
     return (
       <div>
         <div className="preview-bar">
           <span className="pv-title">معاينة: {data.brand.name}</span>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="pv-btn" onClick={() => setData(null)}>← تعديل المدخلات</button>
+            <button className="pv-btn" onClick={() => setStep("pick")}>⇄ القوالب</button>
             <button className="pv-btn primary" onClick={publish} disabled={publishing}>
               {publishing ? "جارٍ النشر…" : "انشر برابط 🚀"}
             </button>
           </div>
+        </div>
+        <div className="custom-bar">
+          <span className="cb-label">القالب:</span>
+          <div className="theme-pills">
+            {(Object.keys(THEMES) as ThemeId[]).map((t) => (
+              <button key={t} className={data.theme === t ? "on" : ""} onClick={() => applyTheme(t)}>
+                {THEMES[t].name}
+              </button>
+            ))}
+          </div>
+          <span className="color-ctl">
+            اللون الأساسي
+            <input type="color" value={data.colors.brand} onChange={(e) => setColor("brand", e.target.value)} aria-label="اللون الأساسي" />
+          </span>
+          <span className="color-ctl">
+            لون الأزرار
+            <input type="color" value={data.colors.cta} onChange={(e) => setColor("cta", e.target.value)} aria-label="لون الأزرار" />
+          </span>
         </div>
         {publishedUrl && (
           <div className="wrap" style={{ paddingTop: 14 }}>
@@ -84,9 +195,7 @@ export default function GeneratorPage() {
         )}
         {error && (
           <div className="wrap" style={{ paddingTop: 14 }}>
-            <div className="publish-result" style={{ borderColor: "rgba(220,60,60,.5)", background: "rgba(220,60,60,.08)" }}>
-              ⚠️ {error}
-            </div>
+            <div className="publish-result" style={{ borderColor: "rgba(220,60,60,.5)", background: "rgba(220,60,60,.08)" }}>⚠️ {error}</div>
           </div>
         )}
         <FlagshipTemplate data={data} />
@@ -94,7 +203,7 @@ export default function GeneratorPage() {
     );
   }
 
-  /* ---------- وضع الإدخال ---------- */
+  /* ═════════ شاشة الإدخال ═════════ */
   return (
     <div className="gen-shell">
       <header className="gen-head">
@@ -105,11 +214,27 @@ export default function GeneratorPage() {
       <main className="gen-body">
         <h1>صفحة هبوط تبيع فعلاً<br />في أقل من دقيقة</h1>
         <p className="lead">
-          صف منتجك وسيكتب الذكاء الاصطناعي المحتوى التسويقي كاملاً ويبني لك
-          صفحة احترافية بأنيميشن — جاهزة للنشر برابط مباشر.
+          صف منتجك — أو ارفع صورته — وسيبني لك وَهْج صفحة احترافية بثلاثة قوالب
+          وألوان قابلة للتخصيص، جاهزة للنشر برابط مباشر.
         </p>
 
         <div className="gen-form">
+          <div className="gf">
+            <label>صورة المنتج (اختياري)</label>
+            <div className="img-drop">
+              <input ref={fileRef} type="file" accept="image/*"
+                     onChange={(e) => onPickImage(e.target.files?.[0] ?? null)} />
+              {imagePreview ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imagePreview} alt="معاينة المنتج" />
+                  <button type="button" className="id-remove" onClick={(e) => { e.stopPropagation(); clearImage(); }}>إزالة ✕</button>
+                </>
+              ) : (
+                <span className="id-hint">📷 اضغط لاختيار صورة من جهازك (حتى 4MB)</span>
+              )}
+            </div>
+          </div>
           <div className="gf">
             <label>اسم المنتج</label>
             <input value={name} onChange={(e) => setName(e.target.value)}
@@ -127,7 +252,7 @@ export default function GeneratorPage() {
                      inputMode="decimal" placeholder="499" />
             </div>
             <div className="gf">
-              <label>رمز المنتج</label>
+              <label>رمز المنتج (يُستخدم إذا لم ترفع صورة)</label>
               <div className="glyph-picker">
                 {GLYPHS.map((g) => (
                   <button key={g} type="button" className={glyph === g ? "on" : ""}
@@ -140,7 +265,7 @@ export default function GeneratorPage() {
           {error && <div className="publish-result" style={{ borderColor: "rgba(220,60,60,.5)", background: "rgba(220,60,60,.08)", marginTop: 0 }}>⚠️ {error}</div>}
 
           <button className="gen-submit" onClick={generate} disabled={loading}>
-            {loading ? "الذكاء الاصطناعي يكتب صفحتك…" : "ولّد صفحة الهبوط ✨"}
+            {loading ? (imageFile ? "رفع الصورة وبناء صفحتك…" : "الذكاء الاصطناعي يكتب صفحتك…") : "ولّد صفحة الهبوط ✨"}
           </button>
           <p className="gen-note">يعمل بوضع مجاني محلي تلقائياً إذا لم يتوفر مفتاح Gemini</p>
         </div>
