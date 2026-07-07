@@ -144,17 +144,25 @@ export default function FlagshipTemplate({ data }: { data: LandingData }) {
           </div>
 
           <div className="stage">
+            {data.hero.image ? (
+              <div className="stage-free">
+                <div className="sf-blob" aria-hidden="true" />
+                <span className="stage-badge sf-badge">{data.hero.badge}</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="sf-img" src={data.hero.image} alt={data.hero.productName} />
+                <div className="sf-meta">
+                  <div className="stage-name sf-name">{data.hero.productName}</div>
+                  <div className="stage-tag">{data.hero.productTag}</div>
+                </div>
+              </div>
+            ) : (
             <div className="stage-card">
               <span className="stage-badge">{data.hero.badge}</span>
-              {data.hero.image ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img className="stage-img" src={data.hero.image} alt={data.hero.productName} />
-              ) : (
-                <div className="stage-glyph" aria-hidden="true">{data.hero.glyph}</div>
-              )}
+              <div className="stage-glyph" aria-hidden="true">{data.hero.glyph}</div>
               <div className="stage-name">{data.hero.productName}</div>
               <div className="stage-tag">{data.hero.productTag}</div>
             </div>
+            )}
             {data.chips[0] && (
               <div className="chip" style={{ top: "16%", right: "-26px" }}>
                 <span className="c-ic" style={{ background: "#EEF1FF" }}>{data.chips[0].icon}</span>

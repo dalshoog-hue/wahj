@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { buildPrompt, generateLocal, type LandingData } from "@/lib/schema";
+import { buildPrompt, generateLocal, type LandingData, type CategoryId } from "@/lib/schema";
 
 export const maxDuration = 30;
 
-interface GenInput { name: string; description: string; price: number; glyph: string; image?: string | null }
+interface GenInput { name: string; description: string; price: number; glyph: string; image?: string | null; category?: CategoryId }
 
 export async function POST(req: Request) {
   let input: GenInput;

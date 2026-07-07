@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import FlagshipTemplate from "@/components/FlagshipTemplate";
-import { THEMES, type LandingData, type ThemeId } from "@/lib/schema";
+import { THEMES, CATEGORIES, type LandingData, type ThemeId, type CategoryId } from "@/lib/schema";
 import { supabase } from "@/lib/supabase";
 import ImageEditor from "@/components/ImageEditor";
 
@@ -21,6 +21,7 @@ export default function GeneratorPage() {
   const [desc, setDesc] = useState("");
   const [price, setPrice] = useState("");
   const [glyph, setGlyph] = useState("🎧");
+  const [category, setCategory] = useState<CategoryId>("general");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -89,7 +90,7 @@ export default function GeneratorPage() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, description: desc, price: Number(price), glyph, image: imageUrl }),
+        body: JSON.stringify({ name, description: desc, price: Number(price), glyph: glyph || CATEGORIES[category].glyph, image: imageUrl, category }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "فشل التوليد");
@@ -253,6 +254,17 @@ export default function GeneratorPage() {
               ) : (
                 <span className="id-hint">📷 اختر صورة من جهازك — مع اقتصاص وإزالة خلفية (حتى 4MB)</span>
               )}
+            </div>
+          </div>
+          <div className="gf">
+            <label>فئة المنتج (تحدد أسلوب المحتوى والقالب)</label>
+            <div className="theme-pills" style={{ flexWrap: "wrap" }}>
+              {(Object.keys(CATEGORIES) as CategoryId[]).map((c) => (
+                <button key={c} type="button" className={category === c ? "on" : ""}
+                        onClick={() => { setCategory(c); setGlyph(CATEGORIES[c].glyph); }}>
+                  {CATEGORIES[c].glyph} {CATEGORIES[c].name}
+                </button>
+              ))}
             </div>
           </div>
           <div className="gf">

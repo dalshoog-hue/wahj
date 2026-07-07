@@ -268,10 +268,10 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .ed-overlay { position:fixed; inset:0; z-index:120; background:rgba(8,11,20,.86); display:flex; align-items:center; justify-content:center; padding:14px; animation:fadeIn .25s; }
 .ed-modal { background:#151B2E; border:1px solid rgba(255,255,255,.1); border-radius:20px; width:min(430px,100%); padding:18px; color:#EDF0F8; }
 .ed-modal h3 { font-size:16px; margin-bottom:12px; }
-.ed-stage { position:relative; width:100%; aspect-ratio:1; border-radius:14px; overflow:hidden; touch-action:none; cursor:grab;
+.ed-stage { position:relative; width:100%; max-height:min(58vh,440px); display:flex; align-items:center; justify-content:center; border-radius:14px; overflow:hidden; touch-action:none; cursor:grab;
   background:conic-gradient(#20283E 0 25%, #1A2135 0 50%, #20283E 0 75%, #1A2135 0) 0 0/22px 22px; }
 .ed-stage:active { cursor:grabbing; }
-.ed-stage canvas { width:100%; height:100%; display:block; }
+.ed-stage canvas { width:100%; height:auto; max-height:min(58vh,440px); display:block; object-fit:contain; }
 .ed-busy { position:absolute; inset:0; display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; background:rgba(8,11,20,.75); font-size:13px; text-align:center; padding:14px; }
 .ed-spinner { width:34px; height:34px; border-radius:50%; border:3px solid rgba(255,255,255,.2); border-top-color:#F2600C; animation:spinE 1s linear infinite; }
 @keyframes spinE { to { transform:rotate(360deg); } }
@@ -285,3 +285,15 @@ body { direction: rtl; background: var(--bg); color: var(--ink); -webkit-font-sm
 .ed-btn.primary:hover { filter:brightness(.92); }
 .ed-btn:disabled { opacity:.5; cursor:not-allowed; }
 .ed-note { font-size:10.5px; color:#7A84A6; margin-top:8px; text-align:center; }
+
+/* ---------- عرض حر لصورة المنتج (بدون إطار) ---------- */
+.stage-free { position:relative; display:flex; flex-direction:column; align-items:center; padding:26px 0 6px; }
+.sf-blob { position:absolute; top:8%; width:min(78%,330px); aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--brand) 32%, transparent) 0%, transparent 68%);
+  filter:blur(14px); z-index:0; }
+.sf-img { position:relative; z-index:1; width:min(100%,420px); max-height:400px; object-fit:contain;
+  filter:drop-shadow(0 34px 36px rgba(10,16,30,.35)); animation:floaty 5.5s ease-in-out infinite; }
+.sf-badge { position:absolute; top:6px; right:6%; z-index:2; }
+.sf-meta { position:relative; z-index:1; text-align:center; margin-top:14px; }
+.sf-name { color:var(--ink); }
+.lp.theme-luxury .sf-img, .lp.theme-royal .sf-img { filter:drop-shadow(0 34px 40px rgba(0,0,0,.6)); }

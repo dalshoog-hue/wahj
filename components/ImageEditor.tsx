@@ -7,8 +7,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
    إزالة الخلفية تعمل بالكامل داخل متصفح المستخدم (بدون خوادم)
    ============================================================ */
 
-const VIEW = 600; // دقة كانفس العرض الداخلية
-const OUT = 900;  // دقة صورة الإخراج
+const VW = 640; // عرض كانفس العرض — الارتفاع يتبع نسبة الصورة
+const OUT_W = 1000;
 
 export default function ImageEditor({
   file,
@@ -23,6 +23,7 @@ export default function ImageEditor({
   const imgRef = useRef<HTMLImageElement | null>(null);
   const prevSrcRef = useRef<string | null>(null); // للتراجع عن إزالة الخلفية
   const [ready, setReady] = useState(false);
+  const [vh, setVh] = useState(VW); // ارتفاع الكانفس حسب نسبة الصورة
   const [zoom, setZoom] = useState(1); // مضاعف فوق مقاس الملاءمة
   const [busy, setBusy] = useState<string | null>(null);
   const [bgRemoved, setBgRemoved] = useState(false);
@@ -35,13 +36,11 @@ export default function ImageEditor({
     const img = new Image();
     img.onload = () => {
       imgRef.current = img;
+      const h = Math.round(VW * (img.height / img.width));
+      setVh(h);
       if (!keepView) {
-        const s = Math.max(VIEW / img.width, VIEW / img.height);
-        pos.current = {
-          baseScale: s,
-          ox: (VIEW - img.width * s) / 2,
-          oy: (VIEW - img.height * s) / 2,
-        };
+        const s = VW / img.width; // ملاءمة كاملة بلا قص افتراضي
+        pos.current = { baseScale: s, ox: 0, oy: 0 };
         setZoom(1);
       }
       setReady(true);
@@ -62,14 +61,14 @@ export default function ImageEditor({
     const c = canvasRef.current, img = imgRef.current;
     if (!c || !img) return;
     const ctx = c.getContext("2d")!;
-    ctx.clearRect(0, 0, VIEW, VIEW);
+    ctx.clearRect(0, 0, c.width, c.height);
     const s = pos.current.baseScale * zoomRef.current;
     ctx.drawImage(img, pos.current.ox, pos.current.oy, img.width * s, img.height * s);
   }, []);
 
   // مرجع حي لقيمة التقريب داخل الرسم
   const zoomRef = useRef(zoom);
-  useEffect(() => { zoomRef.current = zoom; draw(); }, [zoom, draw]);
+  useEffect(() => { zoomRef.current = zoom; draw(); }, [zoom, vh, draw]);
 
   /* ---------- السحب (فأرة + لمس) ---------- */
   const onPointerDown = (e: React.PointerEvent) => {
@@ -79,7 +78,7 @@ export default function ImageEditor({
   const onPointerMove = (e: React.PointerEvent) => {
     if (!drag.current || !canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const k = VIEW / rect.width;
+    const k = VW / rect.width;
     pos.current.ox += (e.clientX - drag.current.x) * k;
     pos.current.oy += (e.clientY - drag.current.y) * k;
     drag.current = { x: e.clientX, y: e.clientY };
@@ -141,9 +140,9 @@ export default function ImageEditor({
     const img = imgRef.current;
     if (!img) return;
     const out = document.createElement("canvas");
-    out.width = OUT; out.height = OUT;
+    const r = OUT_W / VW;
+    out.width = OUT_W; out.height = Math.round(vh * r);
     const ctx = out.getContext("2d")!;
-    const r = OUT / VIEW;
     const s = pos.current.baseScale * zoomRef.current * r;
     ctx.drawImage(img, pos.current.ox * r, pos.current.oy * r, img.width * s, img.height * s);
     out.toBlob((b) => b && onDone(b), "image/png");
@@ -159,7 +158,7 @@ export default function ImageEditor({
              onPointerMove={onPointerMove}
              onPointerUp={onPointerUp}
              onPointerCancel={onPointerUp}>
-          <canvas ref={canvasRef} width={VIEW} height={VIEW} />
+          <canvas ref={canvasRef} width={VW} height={vh} />
           {busy && (
             <div className="ed-busy">
               <div className="ed-spinner" aria-hidden="true" />
@@ -188,7 +187,7 @@ export default function ImageEditor({
           <button className="ed-btn" onClick={onCancel} disabled={!!busy}>إلغاء</button>
           <button className="ed-btn primary" onClick={confirm} disabled={!ready || !!busy}>اعتماد الصورة ✓</button>
         </div>
-        <p className="ed-note">اسحب الصورة لتحديد الإطار · إزالة الخلفية تتم على جهازك مباشرة (Powered by IMG.LY)</p>
+        <p className="ed-note">الأبعاد الأصلية محفوظة — التقريب اختياري للقص · إزالة الخلفية تتم على جهازك مباشرة (Powered by IMG.LY)</p>
       </div>
     </div>
   );
